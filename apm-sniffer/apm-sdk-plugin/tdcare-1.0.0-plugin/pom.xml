@@ -45,7 +45,12 @@
             <artifactId>eventuate-tram-consumer-common</artifactId>
             <version>0.22.0.RC5</version>
             <scope>provided</scope>
-
+        </dependency>
+        <dependency>
+            <groupId>io.eventuate.tram.core</groupId>
+            <artifactId>eventuate-tram-producer-common</artifactId>
+            <version>0.22.0.RC5</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
