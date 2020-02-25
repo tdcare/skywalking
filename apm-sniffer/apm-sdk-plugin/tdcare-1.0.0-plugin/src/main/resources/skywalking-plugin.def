@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.ConsumeMessageConcurrentlyInstrumentation
-tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.ConsumeMessageOrderlyInstrumentation
+tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.MessageProducerImplInstrumentation
+tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.PrePostReceiveMessageHandlerDecoratorInstrumentation
 tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.MQClientAPIImplInstrumentation
 tdcare-1.0.0=org.apache.skywalking.apm.plugin.tdcare.define.SendCallbackInstrumentation

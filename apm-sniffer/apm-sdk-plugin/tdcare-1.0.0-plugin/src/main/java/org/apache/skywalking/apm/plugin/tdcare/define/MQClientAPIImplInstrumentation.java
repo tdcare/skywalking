@@ -44,8 +44,8 @@ public class MQClientAPIImplInstrumentation extends ClassInstanceMethodsEnhanceP
 
     private static final String ENHANCE_CLASS = "com.alibaba.rocketmq.client.impl.MQClientAPIImpl";
     private static final String SEND_MESSAGE_METHOD_NAME = "sendMessage";
-    private static final String ASYNC_METHOD_INTERCEPTOR = "org.apache.skywalking.apm.plugin.rocketMQ.v3.MessageSendInterceptor";
-    private static final String UPDATE_NAME_SERVER_INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.rocketMQ.v3.UpdateNameServerInterceptor";
+    private static final String ASYNC_METHOD_INTERCEPTOR = "org.apache.skywalking.apm.plugin.tdcare.MessageSendInterceptor";
+    private static final String UPDATE_NAME_SERVER_INTERCEPT_CLASS = "org.apache.skywalking.apm.plugin.tdcare.UpdateNameServerInterceptor";
     private static final String UPDATE_NAME_SERVER_METHOD_NAME = "updateNameServerAddressList";
 
     @Override public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {

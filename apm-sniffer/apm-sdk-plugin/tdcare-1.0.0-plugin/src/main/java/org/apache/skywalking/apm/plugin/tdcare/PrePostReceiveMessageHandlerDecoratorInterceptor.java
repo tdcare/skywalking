@@ -16,29 +16,30 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
-import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import java.lang.reflect.Method;
+import com.alibaba.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.tag.Tags;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 
 /**
- * {@link MessageConcurrentlyConsumeInterceptor} set the process status after the {@link
- * com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently#consumeMessage(java.util.List,
- * com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext)} method execute.
+ * {@link PrePostReceiveMessageHandlerDecoratorInterceptor} set the process status after the {@link
+ * com.alibaba.rocketmq.client.consumer.listener.MessageListenerOrderly#consumeMessage(java.util.List,
+ * com.alibaba.rocketmq.client.consumer.listener.ConsumeOrderlyContext)} method execute.
  *
  * @author carlvine500
  */
-public class MessageConcurrentlyConsumeInterceptor extends AbstractMessageConsumeInterceptor {
+public class PrePostReceiveMessageHandlerDecoratorInterceptor extends AbstractMessageConsumeInterceptor {
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         Object ret) throws Throwable {
-        ConsumeConcurrentlyStatus status = (ConsumeConcurrentlyStatus)ret;
-        if (status == ConsumeConcurrentlyStatus.RECONSUME_LATER) {
+
+        ConsumeOrderlyStatus status = (ConsumeOrderlyStatus)ret;
+        if (status == ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT) {
             AbstractSpan activeSpan = ContextManager.activeSpan();
             activeSpan.errorOccurred();
             Tags.STATUS_CODE.set(activeSpan, status.name());
@@ -46,5 +47,5 @@ public class MessageConcurrentlyConsumeInterceptor extends AbstractMessageConsum
         ContextManager.stopSpan();
         return ret;
     }
-}
 
+}

@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3.define;
+package org.apache.skywalking.apm.plugin.tdcare.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -24,21 +24,22 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterc
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInstanceMethodsEnhancePluginDefine;
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
+import org.apache.skywalking.apm.plugin.tdcare.MessageProducerImplInterceptor;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.match.HierarchyMatch.byHierarchyMatch;
 
 /**
- * {@link ConsumeMessageConcurrentlyInstrumentation} intercepts the {@link com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently#consumeMessage(java.util.List,
- * com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext)} method by using {@link
- * org.apache.skywalking.apm.plugin.rocketMQ.v3.MessageConcurrentlyConsumeInterceptor}.
+ * {@link PrePostReceiveMessageHandlerDecoratorInstrumentation} intercepts the {@link com.alibaba.rocketmq.client.consumer.listener.MessageListenerOrderly#consumeMessage(java.util.List,
+ * com.alibaba.rocketmq.client.consumer.listener.ConsumeOrderlyContext)} method by using {@link
+ * MessageProducerImplInterceptor}.
  *
  * @author carlvine500
  */
-public class ConsumeMessageConcurrentlyInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
-    private static final String ENHANCE_CLASS = "com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently";
-    private static final String CONSUMER_MESSAGE_METHOD = "consumeMessage";
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.rocketMQ.v3.MessageConcurrentlyConsumeInterceptor";
+public class PrePostReceiveMessageHandlerDecoratorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+    private static final String ENHANCE_CLASS = "io.eventuate.tram.consumer.common.PrePostReceiveMessageHandlerDecorator";
+    private static final String ENHANCE_METHOD = "accept";
+    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.tdcare.PrePostReceiveMessageHandlerDecoratorInterceptor";
 
     @Override public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
         return new ConstructorInterceptPoint[0];
@@ -48,7 +49,7 @@ public class ConsumeMessageConcurrentlyInstrumentation extends ClassInstanceMeth
         return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
                 @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named(CONSUMER_MESSAGE_METHOD);
+                    return named(ENHANCE_METHOD);
                 }
 
                 @Override public String getMethodsInterceptor() {
