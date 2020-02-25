@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import java.lang.reflect.Method;
 import java.util.List;

@@ -16,28 +16,36 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import java.lang.reflect.Method;
+import com.alibaba.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
+import org.apache.skywalking.apm.agent.core.context.ContextManager;
+import org.apache.skywalking.apm.agent.core.context.tag.Tags;
+import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
-import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
-import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 
-public class UpdateNameServerInterceptor implements InstanceMethodsAroundInterceptor {
-    @Override
-    public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
-        MethodInterceptResult result) throws Throwable {
-        objInst.setSkyWalkingDynamicField(allArguments[0]);
-    }
+/**
+ * {@link MessageOrderlyConsumeInterceptor} set the process status after the {@link
+ * com.alibaba.rocketmq.client.consumer.listener.MessageListenerOrderly#consumeMessage(java.util.List,
+ * com.alibaba.rocketmq.client.consumer.listener.ConsumeOrderlyContext)} method execute.
+ *
+ * @author carlvine500
+ */
+public class MessageOrderlyConsumeInterceptor extends AbstractMessageConsumeInterceptor {
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         Object ret) throws Throwable {
+
+        ConsumeOrderlyStatus status = (ConsumeOrderlyStatus)ret;
+        if (status == ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT) {
+            AbstractSpan activeSpan = ContextManager.activeSpan();
+            activeSpan.errorOccurred();
+            Tags.STATUS_CODE.set(activeSpan, status.name());
+        }
+        ContextManager.stopSpan();
         return ret;
     }
 
-    @Override public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
-        Class<?>[] argumentsTypes, Throwable t) {
-
-    }
 }

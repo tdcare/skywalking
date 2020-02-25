@@ -17,23 +17,21 @@
  */
 
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import java.util.List;
-import com.alibaba.rocketmq.client.producer.SendResult;
-import com.alibaba.rocketmq.client.producer.SendStatus;
 import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractTracingSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.test.helper.SegmentHelper;
+import org.apache.skywalking.apm.agent.test.helper.SpanHelper;
 import org.apache.skywalking.apm.agent.test.tools.AgentServiceRule;
 import org.apache.skywalking.apm.agent.test.tools.SegmentStorage;
 import org.apache.skywalking.apm.agent.test.tools.SegmentStoragePoint;
 import org.apache.skywalking.apm.agent.test.tools.SpanAssert;
 import org.apache.skywalking.apm.agent.test.tools.TracingSegmentRunner;
-import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
-import org.apache.skywalking.apm.plugin.rocketMQ.v3.define.SendCallBackEnhanceInfo;
+import org.apache.skywalking.apm.plugin.tdcare.define.SendCallBackEnhanceInfo;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,9 +46,9 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(TracingSegmentRunner.class)
-public class OnSuccessInterceptorTest {
+public class OnExceptionInterceptorTest {
 
-    private OnSuccessInterceptor successInterceptor;
+    private OnExceptionInterceptor exceptionInterceptor;
 
     @SegmentStoragePoint
     private SegmentStorage segmentStorage;
@@ -60,9 +58,6 @@ public class OnSuccessInterceptorTest {
 
     @Mock
     private ContextSnapshot contextSnapshot;
-    @Mock
-    private SendResult sendResult;
-
     private SendCallBackEnhanceInfo enhanceInfo;
 
     @Mock
@@ -70,45 +65,24 @@ public class OnSuccessInterceptorTest {
 
     @Before
     public void setUp() {
-        successInterceptor = new OnSuccessInterceptor();
+        exceptionInterceptor = new OnExceptionInterceptor();
 
         enhanceInfo = new SendCallBackEnhanceInfo("test", contextSnapshot);
         when(enhancedInstance.getSkyWalkingDynamicField()).thenReturn(enhanceInfo);
-        when(sendResult.getSendStatus()).thenReturn(SendStatus.SEND_OK);
     }
 
     @Test
-    public void testOnSuccess() throws Throwable {
-        successInterceptor.beforeMethod(enhancedInstance, null, new Object[] {sendResult}, null, null);
-        successInterceptor.afterMethod(enhancedInstance, null, new Object[] {sendResult}, null, null);
+    public void testOnException() throws Throwable {
+        exceptionInterceptor.beforeMethod(enhancedInstance, null, new Object[] {new RuntimeException()}, null, null);
+        exceptionInterceptor.afterMethod(enhancedInstance, null, new Object[] {new RuntimeException()}, null, null);
 
         assertThat(segmentStorage.getTraceSegments().size(), is(1));
         TraceSegment traceSegment = segmentStorage.getTraceSegments().get(0);
         List<AbstractTracingSpan> spans = SegmentHelper.getSpans(traceSegment);
         assertThat(spans.size(), is(1));
 
-        AbstractTracingSpan successSpan = spans.get(0);
-
-        SpanAssert.assertComponent(successSpan, ComponentsDefine.ROCKET_MQ_PRODUCER);
-
+        AbstractTracingSpan exceptionSpan = spans.get(0);
+        SpanAssert.assertException(SpanHelper.getLogs(exceptionSpan).get(0), RuntimeException.class);
+        SpanAssert.assertOccurException(exceptionSpan, true);
     }
-
-    @Test
-    public void testOnSuccessWithErrorStatus() throws Throwable {
-        when(sendResult.getSendStatus()).thenReturn(SendStatus.FLUSH_SLAVE_TIMEOUT);
-        successInterceptor.beforeMethod(enhancedInstance, null, new Object[] {sendResult}, null, null);
-        successInterceptor.afterMethod(enhancedInstance, null, new Object[] {sendResult}, null, null);
-
-        assertThat(segmentStorage.getTraceSegments().size(), is(1));
-        TraceSegment traceSegment = segmentStorage.getTraceSegments().get(0);
-        List<AbstractTracingSpan> spans = SegmentHelper.getSpans(traceSegment);
-        assertThat(spans.size(), is(1));
-
-        AbstractTracingSpan successSpan = spans.get(0);
-
-        SpanAssert.assertComponent(successSpan, ComponentsDefine.ROCKET_MQ_PRODUCER);
-        SpanAssert.assertOccurException(successSpan, true);
-
-    }
-
 }

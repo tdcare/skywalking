@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3.define;
+package org.apache.skywalking.apm.plugin.tdcare.define;
 
 import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 

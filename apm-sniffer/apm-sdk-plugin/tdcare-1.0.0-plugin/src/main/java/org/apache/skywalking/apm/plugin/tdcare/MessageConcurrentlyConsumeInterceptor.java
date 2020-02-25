@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import java.lang.reflect.Method;

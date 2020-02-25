@@ -16,46 +16,28 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import java.lang.reflect.Method;
-import org.apache.skywalking.apm.agent.core.context.ContextManager;
-import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
-import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
-import org.apache.skywalking.apm.plugin.rocketMQ.v3.define.SendCallBackEnhanceInfo;
 
-/**
- * {@link OnExceptionInterceptor} create local span when the method {@link com.alibaba.rocketmq.client.producer.SendCallback#onException(Throwable)}
- * execute.
- *
- * @author carlvine500
- */
-public class OnExceptionInterceptor implements InstanceMethodsAroundInterceptor {
-
-    private static final String CALLBACK_OPERATION_NAME_PREFIX = "RocketMQ/";
-
+public class UpdateNameServerInterceptor implements InstanceMethodsAroundInterceptor {
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         MethodInterceptResult result) throws Throwable {
-        SendCallBackEnhanceInfo enhanceInfo = (SendCallBackEnhanceInfo)objInst.getSkyWalkingDynamicField();
-        AbstractSpan activeSpan = ContextManager.createLocalSpan(CALLBACK_OPERATION_NAME_PREFIX + enhanceInfo.getTopicId() + "/Producer/Callback");
-        activeSpan.setComponent(ComponentsDefine.ROCKET_MQ_PRODUCER);
-        activeSpan.errorOccurred().log((Throwable)allArguments[0]);
-        ContextManager.continued(enhanceInfo.getContextSnapshot());
+        objInst.setSkyWalkingDynamicField(allArguments[0]);
     }
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         Object ret) throws Throwable {
-        ContextManager.stopSpan();
         return ret;
     }
 
     @Override public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
         Class<?>[] argumentsTypes, Throwable t) {
-        ContextManager.activeSpan().log(t);
+
     }
 }

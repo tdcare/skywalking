@@ -17,7 +17,7 @@
  */
 
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import java.util.List;
 import com.alibaba.rocketmq.client.impl.CommunicationMode;

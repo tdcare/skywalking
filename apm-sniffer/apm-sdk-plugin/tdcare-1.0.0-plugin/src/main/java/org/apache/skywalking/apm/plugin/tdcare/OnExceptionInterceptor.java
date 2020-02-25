@@ -16,29 +16,26 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
-import com.alibaba.rocketmq.client.producer.SendResult;
-import com.alibaba.rocketmq.client.producer.SendStatus;
 import java.lang.reflect.Method;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
-import org.apache.skywalking.apm.agent.core.context.tag.Tags;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
-import org.apache.skywalking.apm.plugin.rocketMQ.v3.define.SendCallBackEnhanceInfo;
+import org.apache.skywalking.apm.plugin.tdcare.define.SendCallBackEnhanceInfo;
 
 /**
- * {@link OnSuccessInterceptor} create local span when the method {@link com.alibaba.rocketmq.client.producer.SendCallback#onSuccess(SendResult)}
+ * {@link OnExceptionInterceptor} create local span when the method {@link com.alibaba.rocketmq.client.producer.SendCallback#onException(Throwable)}
  * execute.
  *
  * @author carlvine500
  */
-public class OnSuccessInterceptor implements InstanceMethodsAroundInterceptor {
+public class OnExceptionInterceptor implements InstanceMethodsAroundInterceptor {
 
-    public static final String CALLBACK_OPERATION_NAME_PREFIX = "RocketMQ/";
+    private static final String CALLBACK_OPERATION_NAME_PREFIX = "RocketMQ/";
 
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
@@ -46,11 +43,7 @@ public class OnSuccessInterceptor implements InstanceMethodsAroundInterceptor {
         SendCallBackEnhanceInfo enhanceInfo = (SendCallBackEnhanceInfo)objInst.getSkyWalkingDynamicField();
         AbstractSpan activeSpan = ContextManager.createLocalSpan(CALLBACK_OPERATION_NAME_PREFIX + enhanceInfo.getTopicId() + "/Producer/Callback");
         activeSpan.setComponent(ComponentsDefine.ROCKET_MQ_PRODUCER);
-        SendStatus sendStatus = ((SendResult)allArguments[0]).getSendStatus();
-        if (sendStatus != SendStatus.SEND_OK) {
-            activeSpan.errorOccurred();
-            Tags.STATUS_CODE.set(activeSpan, sendStatus.name());
-        }
+        activeSpan.errorOccurred().log((Throwable)allArguments[0]);
         ContextManager.continued(enhanceInfo.getContextSnapshot());
     }
 
@@ -63,6 +56,6 @@ public class OnSuccessInterceptor implements InstanceMethodsAroundInterceptor {
 
     @Override public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
         Class<?>[] argumentsTypes, Throwable t) {
-        ContextManager.activeSpan().errorOccurred().log(t);
+        ContextManager.activeSpan().log(t);
     }
 }

@@ -16,7 +16,7 @@
  *
  */
 
-package org.apache.skywalking.apm.plugin.rocketMQ.v3;
+package org.apache.skywalking.apm.plugin.tdcare;
 
 import com.alibaba.rocketmq.common.message.Message;
 import com.alibaba.rocketmq.common.protocol.header.SendMessageRequestHeader;
@@ -31,7 +31,7 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedI
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
-import org.apache.skywalking.apm.plugin.rocketMQ.v3.define.SendCallBackEnhanceInfo;
+import org.apache.skywalking.apm.plugin.tdcare.define.SendCallBackEnhanceInfo;
 import org.apache.skywalking.apm.util.StringUtil;
 
 import static com.alibaba.rocketmq.common.message.MessageDecoder.NAME_VALUE_SEPARATOR;
