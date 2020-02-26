@@ -24,18 +24,12 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.ConstructorInterc
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInstanceMethodsEnhancePluginDefine;
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
-import org.apache.skywalking.apm.plugin.tdcare.MessageProducerImplInterceptor;
 
+import static net.bytebuddy.matcher.ElementMatchers.isPublic;
 import static net.bytebuddy.matcher.ElementMatchers.named;
-import static org.apache.skywalking.apm.agent.core.plugin.match.HierarchyMatch.byHierarchyMatch;
+import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
-/**
- * {@link MessageProducerImplInstrumentation} intercepts the {@link com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently#consumeMessage(java.util.List,
- * com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext)} method by using {@link
- * MessageProducerImplInterceptor}.
- *
- * @author carlvine500
- */
+
 public class MessageProducerImplInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
     private static final String ENHANCE_CLASS = "io.eventuate.tram.messaging.producer.common.MessageProducerImpl";
     private static final String CONSUMER_MESSAGE_METHOD = "send";
@@ -49,7 +43,7 @@ public class MessageProducerImplInstrumentation extends ClassInstanceMethodsEnha
         return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
                 @Override public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named(CONSUMER_MESSAGE_METHOD);
+                    return named(CONSUMER_MESSAGE_METHOD).and(isPublic());
                 }
 
                 @Override public String getMethodsInterceptor() {
@@ -64,6 +58,6 @@ public class MessageProducerImplInstrumentation extends ClassInstanceMethodsEnha
     }
 
     @Override protected ClassMatch enhanceClass() {
-        return byHierarchyMatch(new String[] {ENHANCE_CLASS});
+        return byName(ENHANCE_CLASS);
     }
 }

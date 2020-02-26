@@ -28,6 +28,7 @@ import org.apache.skywalking.apm.plugin.tdcare.MessageProducerImplInterceptor;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.match.HierarchyMatch.byHierarchyMatch;
+import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
 /**
  * {@link PrePostReceiveMessageHandlerDecoratorInstrumentation} intercepts the {@link com.alibaba.rocketmq.client.consumer.listener.MessageListenerOrderly#consumeMessage(java.util.List,
@@ -64,6 +65,6 @@ public class PrePostReceiveMessageHandlerDecoratorInstrumentation extends ClassI
     }
 
     @Override protected ClassMatch enhanceClass() {
-        return byHierarchyMatch(new String[] {ENHANCE_CLASS});
+        return byName(ENHANCE_CLASS);
     }
 }
